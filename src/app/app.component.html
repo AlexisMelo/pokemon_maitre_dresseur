@@ -1,0 +1,56 @@
+<div>
+  <div class="headerContainer">
+    <button
+      (click)="exportToCsv()"
+      class="export"
+      mat-raised-button
+      color="primary"
+      [disabled]="pokemons.data.length === 0">
+      Exporter en CSV
+    </button>
+  </div>
+
+  <div class="pokemonsTableContainer">
+    <table mat-table [dataSource]="pokemons">
+      <ng-container matColumnDef="image">
+        <th mat-header-cell *matHeaderCellDef>Sprite</th>
+        <td mat-cell *matCellDef="let element">
+          <img
+            class="pokemonImg"
+            [src]="element.image"
+            [alt]="'Image de ' + element.name" />
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Nom (FR)</th>
+        <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="generation">
+        <th mat-header-cell *matHeaderCellDef>Génération</th>
+        <td mat-cell *matCellDef="let element">{{ element.apiGeneration }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="pokedexId">
+        <th mat-header-cell *matHeaderCellDef>N° National</th>
+        <td mat-cell *matCellDef="let element">{{ element.pokedexId }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="victoryPoints">
+        <th mat-header-cell *matHeaderCellDef>Points de victoire</th>
+        <td mat-cell *matCellDef="let element">{{ element.victoryPoints }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+    </table>
+
+    <mat-paginator
+      class="mat-paginator-sticky"
+      [pageSize]="25"
+      [showFirstLastButtons]="true"
+      aria-label="Choisir une page de Pokémon">
+    </mat-paginator>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+.export {
+    margin: 20px;
+}
+
+.mat-paginator-sticky {
+    bottom: 0px;
+    position: sticky;
+    z-index: 10;
+}
+
+.headerContainer {
+    height: 10vh;
+}
+
+.pokemonsTableContainer {
+    height: 90vh;
+    overflow-y: auto;
+}
+
+.mat-column-image, .mat-column-generation, .mat-column-pokedexId, .mat-column-name {
+    text-align: center;
+}
+
+.mat-mdc-row:hover {
+    background-color: lightgray;
+}
+
+.pokemonImg {
+    width: 50px;
+}
