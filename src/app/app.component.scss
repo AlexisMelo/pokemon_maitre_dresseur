@@ -1,3 +1,5 @@
+$md_color: #e9f4f7;
+
 .export {
     margin: 20px;
 }
@@ -10,6 +12,18 @@
 
 .headerContainer {
     height: 10vh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: row;
+
+    .legend {
+        background-color: $md_color;
+        padding: 10px;
+        margin-right: 20px;
+        border-radius: 5px;
+        margin-left: auto;
+    }
 }
 
 .pokemonsTableContainer {
@@ -17,7 +31,7 @@
     overflow-y: auto;
 }
 
-.mat-column-image, .mat-column-generation, .mat-column-pokedexId, .mat-column-name {
+th[mat-header-cell], td[mat-cell] {
     text-align: center;
 }
 
@@ -28,3 +42,12 @@
 .pokemonImg {
     width: 50px;
 }
+
+.typeImg {
+    width: 30px;
+}
+
+.mat-column-md_primaryType, .mat-column-md_victoryPoints, .mat-column-md_dmg, .mat-column-md_attackName, .mat-column-md_couleurContour, .mat-column-md_starter {
+    background-color: $md_color  !important;
+}
+

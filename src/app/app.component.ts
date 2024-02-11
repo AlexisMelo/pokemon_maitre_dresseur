@@ -6,11 +6,21 @@ import { PokemonMaster } from './pokemon-models/pokemon-master.model';
 import { MatButtonModule } from '@angular/material/button';
 import { UtilsService } from './utils.service';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatIconModule } from '@angular/material/icon';
+import { RawPokemon } from './pokemon-models/raw-pokemon.model';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MatTableModule, MatButtonModule, MatPaginatorModule],
+  imports: [
+    RouterOutlet,
+    MatTableModule,
+    MatButtonModule,
+    MatPaginatorModule,
+    MatTooltipModule,
+    MatIconModule,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
@@ -23,12 +33,31 @@ export class AppComponent implements AfterViewInit {
   /**
    * Liste des Pokémon
    */
-  public pokemons: MatTableDataSource<PokemonMaster>;
+  private pokemons: Array<RawPokemon> = [];
+
+  /**
+   * Liste des Pokémon
+   */
+  public pokemonDataSource: MatTableDataSource<PokemonMaster>;
 
   /**
    * Colonnes à afficher
    */
-  public columns = ['image', 'name', 'generation', 'pokedexId'];
+  public columns = [
+    'pokedexId',
+    'generation',
+    'name',
+    'preEvolutions',
+    'image',
+    'evolutions',
+    'types',
+    'md_victoryPoints',
+    'md_dmg',
+    'md_primaryType',
+    'md_attackName',
+    'md_couleurContour',
+    'md_starter',
+  ];
 
   /**
    * Constructeur
@@ -38,18 +67,23 @@ export class AppComponent implements AfterViewInit {
     private pokemonService: PokemonService,
     private utilsService: UtilsService
   ) {
-    this.pokemons = new MatTableDataSource();
+    this.pokemonDataSource = new MatTableDataSource();
   }
 
   /**
    * Implémentation de AfterViewInit
    */
   ngAfterViewInit() {
-    this.pokemons.paginator = this.paginator;
+    this.pokemonDataSource.paginator = this.paginator;
 
     this.pokemonService.getAllPokemon().subscribe({
       next: pokemons =>
-        (this.pokemons.data = pokemons.map(p => ({ ...p, vi: 0 }))),
+        (this.pokemonDataSource.data = pokemons.map(p => ({
+          ...p,
+          vi: 0,
+          md_primaryType: p.apiTypes[0],
+          md_starter: false,
+        }))),
     });
   }
 
@@ -57,12 +91,42 @@ export class AppComponent implements AfterViewInit {
    * Exporte tous les pokemons en CSV
    */
   exportToCsv() {
-    let content = 'nom_francais;generation;id_national;\n';
+    let content =
+      'name;generation;pokedexId;md_victoryPoints;md_dmg;md_primaryType;md_attackName;md_couleurContour;md_starter\n';
 
-    for (const pokemon of this.pokemons.data) {
-      content += `${pokemon.apiGeneration};${pokemon.id};${pokemon.name}\n`;
+    for (const pokemon of this.pokemonDataSource.data) {
+      content += `${pokemon.name};${pokemon.apiGeneration};${pokemon.pokedexId};${pokemon.md_victoryPoints ?? ''};${pokemon.md_dmg ?? ''};${pokemon.md_primaryType.name ?? ''};${pokemon.md_attackName ?? ''};${pokemon.md_couleurContour ?? ''};${pokemon.md_starter}\n`;
     }
 
-    this.utilsService.saveToFile(content, 'pokemons.csv');
+    this.utilsService.saveToFile(content, 'md_pokemon.csv');
+  }
+
+  /**
+   * Exporte en JSON les données récupérées de l'API
+   */
+  exportBaseJson() {
+    this.utilsService.saveToFile(
+      JSON.stringify(this.pokemons),
+      'pokemon_base.json'
+    );
+  }
+
+  /**
+   * Exporte en JSON la totalité des données, y compris celles exprès pour le jeu Pokémon Maître Dresseur
+   */
+  exportFullJson() {
+    this.utilsService.saveToFile(
+      JSON.stringify(this.pokemonDataSource.data),
+      'pokemon_full.json'
+    );
+  }
+
+  /**
+   * Trouver les détails d'un pokemon en fonction de son ID
+   * @param pokedexId
+   * @returns
+   */
+  getPokemonByPokedexId(pokedexId: number) {
+    return this.pokemonDataSource.data.find(p => p.pokedexId === pokedexId);
   }
 }

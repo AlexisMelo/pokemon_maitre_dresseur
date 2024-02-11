@@ -1,3 +1,4 @@
+import { SimplePokemonAvecUneFauteMdr } from './simple-pokemon-avec-une-faute-mdr.model';
 import { SimplePokemon } from './simple-pokemon.model';
 import { Stats } from './stats.model';
 import { Type } from './type.model';
@@ -53,10 +54,5 @@ export interface RawPokemon extends SimplePokemon {
   /**
    * Pré-evolutions
    */
-  apiPreEvolution: Array<SimplePokemon>;
-
-  /**
-   * Types
-   */
-  types: Array<string>;
+  apiPreEvolution: SimplePokemonAvecUneFauteMdr;
 }

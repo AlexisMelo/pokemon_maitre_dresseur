@@ -4,16 +4,72 @@
       (click)="exportToCsv()"
       class="export"
       mat-raised-button
-      color="primary"
-      [disabled]="pokemons.data.length === 0">
+      color="accent"
+      [disabled]="pokemonDataSource.data.length === 0"
+      matTooltip="Exporter au format .csv (separateur point-virgule) les données utiles au jeu Pokémon Maître Dresseur">
       Exporter en CSV
     </button>
+    <button
+      (click)="exportBaseJson()"
+      class="export"
+      color="primary"
+      mat-raised-button
+      [disabled]="pokemonDataSource.data.length === 0"
+      matTooltip="Exporter au format .json les données de base obtenues de l'API pokebuildapi.fr">
+      Exporter JSON de base
+    </button>
+    <button
+      (click)="exportFullJson()"
+      class="export"
+      color="primary"
+      mat-raised-button
+      [disabled]="pokemonDataSource.data.length === 0"
+      matTooltip="Exporter au format .json les données de base obtenues de l'API pokebuildapi.fr + les données utiles au jeu Pokémon Maître Dresseur">
+      Exporter JSON complet
+    </button>
+    <div class="legend">Pokémon Maître Dresseur</div>
   </div>
 
   <div class="pokemonsTableContainer">
-    <table mat-table [dataSource]="pokemons">
+    <table mat-table [dataSource]="pokemonDataSource">
+      <ng-container matColumnDef="pokedexId">
+        <th mat-header-cell *matHeaderCellDef>N° National</th>
+        <td mat-cell *matCellDef="let element">{{ element.pokedexId }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="generation">
+        <th mat-header-cell *matHeaderCellDef>Génération</th>
+        <td mat-cell *matCellDef="let element">{{ element.apiGeneration }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Nom</th>
+        <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="preEvolutions">
+        <th mat-header-cell *matHeaderCellDef>Pré-évolution</th>
+        <td mat-cell *matCellDef="let element">
+          @if (element.apiPreEvolution && element.apiPreEvolution !== 'none') {
+            <img
+              class="typeImg"
+              [src]="
+                getPokemonByPokedexId(element.apiPreEvolution.pokedexIdd)?.image
+              "
+              [alt]="
+                'Image de ' +
+                getPokemonByPokedexId(element.apiPreEvolution.pokedexIdd)?.name
+              "
+              [matTooltip]="
+                getPokemonByPokedexId(element.apiPreEvolution.pokedexIdd)
+                  ?.name ?? ''
+              " />
+          }
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="image">
-        <th mat-header-cell *matHeaderCellDef>Sprite</th>
+        <th mat-header-cell *matHeaderCellDef>Pokémon</th>
         <td mat-cell *matCellDef="let element">
           <img
             class="pokemonImg"
@@ -22,24 +78,80 @@
         </td>
       </ng-container>
 
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>Nom (FR)</th>
-        <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+      <ng-container matColumnDef="evolutions">
+        <th mat-header-cell *matHeaderCellDef>Évolutions</th>
+        <td mat-cell *matCellDef="let element">
+          @for (evolution of element.apiEvolutions; track $index) {
+            <img
+              class="typeImg"
+              [src]="getPokemonByPokedexId(evolution.pokedexId)?.image"
+              [alt]="
+                'Image de ' + getPokemonByPokedexId(evolution.pokedexId)?.name
+              "
+              [matTooltip]="
+                getPokemonByPokedexId(evolution.pokedexId)?.name ?? ''
+              " />
+          }
+        </td>
       </ng-container>
 
-      <ng-container matColumnDef="generation">
-        <th mat-header-cell *matHeaderCellDef>Génération</th>
-        <td mat-cell *matCellDef="let element">{{ element.apiGeneration }}</td>
+      <ng-container matColumnDef="types">
+        <th mat-header-cell *matHeaderCellDef>Types</th>
+        <td mat-cell *matCellDef="let element">
+          @for (type of element.apiTypes; track $index) {
+            <img
+              class="typeImg"
+              [src]="type.image"
+              [alt]="'Type' + type.name"
+              [matTooltip]="type.name" />
+          }
+        </td>
       </ng-container>
 
-      <ng-container matColumnDef="pokedexId">
-        <th mat-header-cell *matHeaderCellDef>N° National</th>
-        <td mat-cell *matCellDef="let element">{{ element.pokedexId }}</td>
+      <ng-container matColumnDef="md_victoryPoints">
+        <th mat-header-cell *matHeaderCellDef>Points</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.md_victoryPoints }}
+        </td>
       </ng-container>
 
-      <ng-container matColumnDef="victoryPoints">
-        <th mat-header-cell *matHeaderCellDef>Points de victoire</th>
-        <td mat-cell *matCellDef="let element">{{ element.victoryPoints }}</td>
+      <ng-container matColumnDef="md_dmg">
+        <th mat-header-cell *matHeaderCellDef>Dégats</th>
+        <td mat-cell *matCellDef="let element">{{ element.md_dmg }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="md_primaryType">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let element">
+          <img
+            class="typeImg"
+            [src]="element.md_primaryType.image"
+            [alt]="'Type' + element.md_primaryType.name"
+            [matTooltip]="element.md_primaryType.name" />
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="md_attackName">
+        <th mat-header-cell *matHeaderCellDef>Attaque</th>
+        <td mat-cell *matCellDef="let element">{{ element.md_attackName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="md_couleurContour">
+        <th mat-header-cell *matHeaderCellDef>Contour</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.md_couleurContour }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="md_starter">
+        <th mat-header-cell *matHeaderCellDef>Starter</th>
+        <td mat-cell *matCellDef="let element">
+          @if (element.md_starter) {
+            <mat-icon color="primary">check_circle</mat-icon>
+          } @else {
+            <mat-icon color="warn">cancel</mat-icon>
+          }
+        </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
